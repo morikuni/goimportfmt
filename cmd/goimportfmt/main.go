@@ -263,7 +263,7 @@ func createApp() *appmain.App {
 
 			_, removeLine := removeLines[lineNum]
 			switch {
-			case lineNum > lastImportLine:
+			case lineNum > lastImportLine && !inImport:
 				break LOOP
 			case strings.HasPrefix(line, "import"):
 				afterFirstImport = true
