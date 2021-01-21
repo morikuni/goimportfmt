@@ -20,7 +20,6 @@ import (
 
 	"github.com/morikuni/failure"
 	"github.com/morikuni/go-appmain"
-
 	"golang.org/x/mod/modfile"
 	"golang.org/x/tools/go/packages"
 )
@@ -229,6 +228,10 @@ func createApp() *appmain.App {
 
 	var result []byte
 	sort := app.AddMainTask("sort imports", func(ctx context.Context) error {
+		if load.Err() != nil {
+			return nil
+		}
+
 		if len(imports) == 0 {
 			return nil
 		}
@@ -367,6 +370,10 @@ func createApp() *appmain.App {
 	}, appmain.RunAfter(load))
 
 	app.AddMainTask("write result", func(ctx context.Context) error {
+		if sort.Err() != nil {
+			return nil
+		}
+
 		var out io.Writer = os.Stdout
 		if writeBack {
 			f, err := os.Create(target)
