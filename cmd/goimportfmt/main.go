@@ -107,7 +107,7 @@ func createApp() *appmain.App {
 				if strings.Contains(e.Msg, "working directory is not part of a module") {
 					continue
 				}
-				pkgErr = failure.Unexpected(e.Msg, failure.Message("error detected during loading package: "+e.Msg))
+				pkgErr = failure.Unexpected(e.Msg, failure.Message("failed to load package: "+e.Msg))
 			}
 		})
 		if pkgErr != nil {
@@ -157,7 +157,7 @@ func createApp() *appmain.App {
 		fileSet := token.NewFileSet()
 		f, err := parser.ParseFile(fileSet, target, nil, parser.ParseComments)
 		if err != nil {
-			panic(err)
+			return failure.Wrap(err, failure.Message(err.Error()))
 		}
 
 		ast.Inspect(f, func(node ast.Node) bool {
@@ -371,6 +371,10 @@ func createApp() *appmain.App {
 
 	app.AddMainTask("write result", func(ctx context.Context) error {
 		if sort.Err() != nil {
+			return nil
+		}
+
+		if len(result) == 0 {
 			return nil
 		}
 
