@@ -1,4 +1,4 @@
-module github.com/morikuni/go-importfmt
+module github.com/morikuni/goimportfmt
 
 go 1.15
 
