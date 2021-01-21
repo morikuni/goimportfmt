@@ -292,6 +292,10 @@ func createApp() *appmain.App {
 
 		fmt.Fprintln(buf)
 
+		sort.Slice(imports, func(i, j int) bool {
+			return imports[i].Path < imports[j].Path
+		})
+
 		// print doc imports first
 		var docImports []*Import
 		var nonDocImports []*Import
@@ -300,7 +304,6 @@ func createApp() *appmain.App {
 				nonDocImports = append(nonDocImports, i)
 			} else {
 				docImports = append(docImports, i)
-
 			}
 		}
 
