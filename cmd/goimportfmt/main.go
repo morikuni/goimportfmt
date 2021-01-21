@@ -160,68 +160,65 @@ func createApp() *appmain.App {
 			return failure.Wrap(err, failure.Message(err.Error()))
 		}
 
-		ast.Inspect(f, func(node ast.Node) bool {
-			switch nt := node.(type) {
-			case *ast.GenDecl:
-				if nt.Tok != token.IMPORT {
-					return false
-				}
-
-				var docs []string
-				var docLine int
-				if nt.Doc != nil {
-					for _, c := range nt.Doc.List {
-						docs = append(docs, c.Text)
-					}
-					docLine = fileSet.Position(nt.Doc.Pos()).Line
-				}
-
-				var isNotFirst bool
-				for _, s := range nt.Specs {
-					if isNotFirst {
-						docs = nil
-						docLine = 0
-					}
-					isNotFirst = true
-					is := s.(*ast.ImportSpec)
-
-					pathPos := fileSet.Position(is.Path.Pos())
-					path, err := strconv.Unquote(is.Path.Value)
-					if err != nil {
-						path = is.Path.Value
-					}
-					impt := &Import{
-						Path:     path,
-						LineFrom: pathPos.Line,
-						LineTo:   pathPos.Line,
-						Docs:     docs,
-					}
-					if docLine != 0 {
-						impt.LineFrom = docLine
-					}
-					if is.Doc != nil {
-						impt.LineFrom = fileSet.Position(is.Doc.Pos()).Line
-						for _, c := range is.Doc.List {
-							impt.Docs = append(impt.Docs, c.Text)
-						}
-					}
-					if is.Comment != nil {
-						for _, c := range is.Comment.List {
-							// Not sure if having more than 1 comment.
-							impt.Comment += c.Text
-						}
-					}
-					if is.Name != nil {
-						impt.Name = is.Name.Name
-					}
-					imports = append(imports, impt)
-				}
-
-				return false
-			default:
-				return true
+		for _, d := range f.Decls {
+			gd, ok := d.(*ast.GenDecl)
+			if !ok {
+				continue
 			}
-		})
+			if gd.Tok != token.IMPORT {
+				continue
+			}
+
+			var docs []string
+			var docLine int
+			if gd.Doc != nil {
+				for _, c := range gd.Doc.List {
+					docs = append(docs, c.Text)
+				}
+				docLine = fileSet.Position(gd.Doc.Pos()).Line
+			}
+
+			var isNotFirst bool
+			for _, s := range gd.Specs {
+				if isNotFirst {
+					docs = nil
+					docLine = 0
+				}
+				isNotFirst = true
+				is := s.(*ast.ImportSpec)
+
+				pathPos := fileSet.Position(is.Path.Pos())
+				path, err := strconv.Unquote(is.Path.Value)
+				if err != nil {
+					path = is.Path.Value
+				}
+				impt := &Import{
+					Path:     path,
+					LineFrom: pathPos.Line,
+					LineTo:   pathPos.Line,
+					Docs:     docs,
+				}
+				if docLine != 0 {
+					impt.LineFrom = docLine
+				}
+				if is.Doc != nil {
+					impt.LineFrom = fileSet.Position(is.Doc.Pos()).Line
+					for _, c := range is.Doc.List {
+						impt.Docs = append(impt.Docs, c.Text)
+					}
+				}
+				if is.Comment != nil {
+					for _, c := range is.Comment.List {
+						// Not sure if having more than 1 comment.
+						impt.Comment += c.Text
+					}
+				}
+				if is.Name != nil {
+					impt.Name = is.Name.Name
+				}
+				imports = append(imports, impt)
+			}
+		}
 
 		return nil
 	})
