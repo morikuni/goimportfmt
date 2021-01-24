@@ -240,7 +240,7 @@ func loadImports(f *ast.File) ([]*Import, error) {
 		var docs []string
 		if gd.Doc != nil {
 			for _, c := range gd.Doc.List {
-				docs = append(docs, strings.TrimSpace(strings.TrimPrefix(c.Text, "//")))
+				docs = append(docs, strings.TrimPrefix(c.Text, "//"))
 			}
 		}
 
@@ -262,13 +262,13 @@ func loadImports(f *ast.File) ([]*Import, error) {
 			}
 			if is.Doc != nil {
 				for _, c := range is.Doc.List {
-					impt.Docs = append(impt.Docs, strings.TrimSpace(strings.TrimPrefix(c.Text, "//")))
+					impt.Docs = append(impt.Docs, strings.TrimPrefix(c.Text, "//"))
 				}
 			}
 			if is.Comment != nil {
 				for _, c := range is.Comment.List {
 					// Not sure if having more than 1 comment.
-					impt.Comment += strings.TrimSpace(strings.TrimPrefix(c.Text, "//"))
+					impt.Comment += strings.TrimPrefix(c.Text, "//")
 				}
 			}
 			if is.Name != nil {
@@ -327,7 +327,7 @@ func (gp GroupedImports) WriteTo(w io.Writer) (written int64, _ error) {
 
 		for _, i := range is {
 			for _, d := range i.Docs {
-				n, err := fmt.Fprintf(w, "\t// %s\n", d)
+				n, err := fmt.Fprintf(w, "\t//%s\n", d)
 				if err != nil {
 					return 0, err
 				}
@@ -355,7 +355,7 @@ func (gp GroupedImports) WriteTo(w io.Writer) (written int64, _ error) {
 			written += int64(n)
 
 			if i.Comment != "" {
-				n, err = fmt.Fprintf(w, " // %s", i.Comment)
+				n, err = fmt.Fprintf(w, " //%s", i.Comment)
 				if err != nil {
 					return 0, err
 				}
