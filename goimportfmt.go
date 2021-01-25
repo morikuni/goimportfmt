@@ -134,6 +134,12 @@ func WithModulePath(path string) Option {
 	}
 }
 
+func WithFormatFunc(f FormatFunc) Option {
+	return func(c *config) {
+		c.formatFunc = f
+	}
+}
+
 func newConfig(opts []Option) *config {
 	c := &config{
 		formatFunc: defaultFormatFunc,
